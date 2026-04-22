@@ -5,10 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-  <title>每日时间记录</title>
+  <title>每日记录</title>
   <style>
     :root {
-      --bg: #f5f7fb;
+      --bg1: #f8fafc;
+      --bg2: #eef2ff;
       --card: #ffffff;
       --text: #1f2937;
       --muted: #6b7280;
@@ -17,6 +18,9 @@
       --radius: 18px;
       --disabled: #cfd5df;
       --disabled-text: #667085;
+      --danger-row: #ffe4e6;
+      --danger-cell: #fecdd3;
+      --danger-text: #9f1239;
     }
 
     * { box-sizing: border-box; }
@@ -25,14 +29,14 @@
       margin: 0;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
       color: var(--text);
-      background: linear-gradient(180deg, #f8fafc 0%, #eef2ff 100%);
+      background: linear-gradient(180deg, var(--bg1) 0%, var(--bg2) 100%);
       padding: env(safe-area-inset-top) 14px env(safe-area-inset-bottom) 18px;
     }
 
     .wrap {
-      max-width: 900px;
+      max-width: 960px;
       margin: 0 auto;
-      padding: 14px 0 30px;
+      padding: 14px 0 34px;
     }
 
     .card {
@@ -49,36 +53,46 @@
       line-height: 1.2;
     }
 
-    .sub, .muted {
+    .sub,
+    .muted,
+    .tip {
       color: var(--muted);
-      font-size: 14px;
-      line-height: 1.5;
+      line-height: 1.55;
     }
+
+    .sub { font-size: 14px; }
+    .muted, .tip { font-size: 13px; }
 
     .today {
       font-size: 16px;
       font-weight: 800;
-      margin-bottom: 10px;
+      margin-top: 10px;
     }
 
-    .grid {
+    .summary {
+      margin-top: 8px;
+      font-size: 14px;
+      line-height: 1.65;
+      color: #374151;
+    }
+
+    .section-title {
+      font-size: 18px;
+      font-weight: 800;
+      margin: 0 0 12px;
+    }
+
+    .btn-grid {
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 12px;
-    }
-
-    .extra-grid {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 12px;
-      margin-top: 12px;
     }
 
     button {
       border: 0;
       border-radius: 18px;
-      min-height: 90px;
-      padding: 10px 12px;
+      min-height: 96px;
+      padding: 12px;
       font-size: 22px;
       font-weight: 800;
       color: #172033;
@@ -86,6 +100,7 @@
       box-shadow: 0 8px 20px rgba(15, 23, 42, 0.10);
       transition: transform 0.08s ease, filter 0.2s ease, opacity 0.2s ease;
       -webkit-tap-highlight-color: transparent;
+      text-align: center;
     }
 
     button:active { transform: scale(0.98); }
@@ -98,7 +113,7 @@
       opacity: 1;
     }
 
-    .btn-label {
+    .btn-title {
       display: block;
       font-size: 22px;
       line-height: 1.2;
@@ -109,58 +124,58 @@
       margin-top: 8px;
       font-size: 16px;
       font-weight: 700;
-      opacity: 0.9;
+      opacity: 0.92;
       min-height: 20px;
     }
 
-    .c1 { background: linear-gradient(180deg, #fde68a, #fcd34d); }
-    .c2 { background: linear-gradient(180deg, #bfdbfe, #93c5fd); }
-    .c3 { background: linear-gradient(180deg, #c7f9cc, #86efac); }
-    .c4 { background: linear-gradient(180deg, #fecdd3, #fda4af); }
-    .c5 { background: linear-gradient(180deg, #ddd6fe, #c4b5fd); }
-    .c6 { background: linear-gradient(180deg, #bae6fd, #7dd3fc); }
-    .c7 { background: linear-gradient(180deg, #fed7aa, #fdba74); }
-    .c8 { background: linear-gradient(180deg, #fecaca, #fca5a5); }
+    .btn-hint {
+      display: block;
+      margin-top: 4px;
+      font-size: 12px;
+      font-weight: 600;
+      opacity: 0.85;
+    }
 
-    .top-actions,
-    .tools {
+    .tone-a { background: linear-gradient(180deg, #fde68a, #fcd34d); }
+    .tone-b { background: linear-gradient(180deg, #bfdbfe, #93c5fd); }
+    .tone-c { background: linear-gradient(180deg, #c7f9cc, #86efac); }
+    .tone-d { background: linear-gradient(180deg, #ddd6fe, #c4b5fd); }
+    .tone-e { background: linear-gradient(180deg, #fecdd3, #fda4af); }
+    .tone-f { background: linear-gradient(180deg, #bae6fd, #7dd3fc); }
+    .tone-g { background: linear-gradient(180deg, #fed7aa, #fdba74); }
+    .tone-h { background: linear-gradient(180deg, #fecaca, #fca5a5); }
+    .tone-i { background: linear-gradient(180deg, #fca5a5, #fb7185); color: #4c0519; }
+
+    .toolbar,
+    .toolbar-3,
+    .note-row {
       display: grid;
       grid-template-columns: 1fr;
       gap: 12px;
       margin-top: 12px;
     }
 
-    .action-btn,
-    .small-btn {
+    .tool-btn {
       min-height: 58px;
       font-size: 19px;
       font-weight: 800;
       border-radius: 16px;
       background: linear-gradient(180deg, #e9efff, #dbeafe);
+      color: #172033;
     }
 
-    .small-btn.warn { background: linear-gradient(180deg, #fee2e2, #fecaca); }
-    .small-btn.neutral { background: linear-gradient(180deg, #f3f4f6, #e5e7eb); }
+    .tool-btn.warn { background: linear-gradient(180deg, #fee2e2, #fecaca); }
 
-    .status {
+    .more-panel,
+    .log {
       margin-top: 12px;
-      min-height: 22px;
-      font-weight: 700;
-      font-size: 14px;
+      display: none;
     }
 
-    .ok { color: #15803d; }
-    .warn-text { color: #b45309; }
+    .more-panel.open,
+    .log.open { display: block; }
 
-    .summary-line {
-      font-size: 15px;
-      line-height: 1.7;
-      margin-top: 8px;
-    }
-
-    .summary-line b { font-weight: 800; }
-
-    .note-box {
+    .note-wrap {
       margin-top: 14px;
       padding-top: 14px;
       border-top: 1px solid var(--line);
@@ -184,13 +199,6 @@
       box-shadow: 0 0 0 4px rgba(147,197,253,0.25);
     }
 
-    .note-actions {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 10px;
-      margin-top: 10px;
-    }
-
     .today-note {
       margin-top: 10px;
       font-size: 14px;
@@ -208,7 +216,7 @@
 
     table {
       width: 100%;
-      min-width: 1320px;
+      min-width: 1460px;
       border-collapse: collapse;
       font-size: 14px;
     }
@@ -219,187 +227,237 @@
       text-align: left;
       vertical-align: top;
       white-space: nowrap;
+      background: #fff;
     }
 
     th {
       position: sticky;
       top: 0;
       background: #f8fafc;
-      z-index: 1;
+      z-index: 2;
       font-size: 13px;
     }
 
-    td:last-child, th:last-child {
+    thead th:first-child,
+    tbody td:first-child {
+      position: sticky;
+      left: 0;
+      z-index: 3;
+      background: #fff;
+    }
+
+    thead th:first-child {
+      background: #f8fafc;
+      z-index: 4;
+    }
+
+    td:last-child,
+    th:last-child {
       white-space: normal;
       min-width: 220px;
     }
 
-    .foot {
-      margin-top: 10px;
-      font-size: 12px;
-      color: var(--muted);
-      line-height: 1.6;
+    tr.crash-row td {
+      background: var(--danger-row);
+      color: var(--danger-text);
     }
 
-    .hidden { display: none; }
+    tr.crash-row td:first-child {
+      background: var(--danger-cell);
+      font-weight: 800;
+    }
+
+    .tag-crash {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 800;
+      background: #fecdd3;
+      color: #9f1239;
+    }
+
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: 22px;
+      transform: translateX(-50%) translateY(16px);
+      background: rgba(20, 28, 45, 0.92);
+      color: #fff;
+      padding: 12px 16px;
+      border-radius: 999px;
+      font-size: 14px;
+      opacity: 0;
+      pointer-events: none;
+      transition: all .18s ease;
+      max-width: calc(100vw - 30px);
+      text-align: center;
+      z-index: 99;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
 
     @media (min-width: 700px) {
-      .top-actions,
-      .tools,
-      .note-actions {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-      }
-      .tools.three {
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-      }
+      .toolbar { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .toolbar-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .note-row { grid-template-columns: 1fr 180px; align-items: start; }
+    }
+
+    @media (max-width: 640px) {
+      h1 { font-size: 24px; }
+      .btn-title { font-size: 18px; }
+      .btn-time { font-size: 15px; }
+      .tool-btn { font-size: 16px; }
     }
   </style>
 </head>
 <body>
   <div class="wrap">
     <div class="card">
-      <h1>每日时间记录</h1>
-      <div class="sub">日本时间自动记录。主按钮当天按过一次就会变灰并锁定。数据只保存在你自己的浏览器本地。</div>
-      <div class="today" id="todayLabel"></div>
-      <div class="summary-line" id="todaySummary"></div>
-      <div class="today-note" id="todayNote"></div>
-      <div class="status" id="status"></div>
+      <h1>每日记录</h1>
+      <div class="sub">适合 iPhone Safari 使用，时间自动按日本时间记录。当天按过的按钮会变灰，不能重复点击。</div>
+      <div class="today" id="todayInfo"></div>
+      <div class="summary" id="todayMiniSummary"></div>
     </div>
 
     <div class="card">
-      <div class="grid" id="mainButtons"></div>
-      <div class="top-actions">
-        <button class="action-btn" id="toggleMoreBtn" type="button">更多</button>
-        <button class="action-btn" id="toggleViewBtn" type="button">显示最近21天</button>
+      <div class="section-title">今天的按钮</div>
+      <div class="btn-grid">
+        <button class="tone-a record-btn" data-field="preGymSleep">
+          <span class="btn-title">健身前睡了</span>
+          <span class="btn-time">未记录</span>
+          <span class="btn-hint">点一下自动记时间</span>
+        </button>
+        <button class="tone-b record-btn" data-field="preGymWake">
+          <span class="btn-title">健身前醒了</span>
+          <span class="btn-time">未记录</span>
+          <span class="btn-hint">点一下自动记时间</span>
+        </button>
+        <button class="tone-c record-btn" data-field="gymOut">
+          <span class="btn-title">出门健身了</span>
+          <span class="btn-time">未记录</span>
+          <span class="btn-hint">点一下自动记时间</span>
+        </button>
+        <button class="tone-d record-btn" data-field="lieDown">
+          <span class="btn-title">躺下了</span>
+          <span class="btn-time">未记录</span>
+          <span class="btn-hint">点一下自动记时间</span>
+        </button>
+        <button class="tone-e record-btn" data-field="sleep">
+          <span class="btn-title">入睡</span>
+          <span class="btn-time">未记录</span>
+          <span class="btn-hint">点一下自动记时间</span>
+        </button>
+        <button class="tone-f record-btn" data-field="secondSleep">
+          <span class="btn-title">二次入睡</span>
+          <span class="btn-time">未记录</span>
+          <span class="btn-hint">点一下自动记时间</span>
+        </button>
       </div>
-      <div class="extra-grid hidden" id="extraButtons"></div>
 
-      <div class="note-box">
-        <div style="font-weight:800; margin-bottom:8px;">备注（追加模式）</div>
-        <div class="muted">同一天再次保存备注时，会自动接在后面，不会覆盖之前的内容。</div>
-        <textarea id="noteInput" placeholder="例如：今天有点累 / 腿很酸 / 状态不错"></textarea>
-        <div class="note-actions">
-          <button class="small-btn" id="saveNoteBtn" type="button">保存备注</button>
-          <button class="small-btn neutral" id="clearNoteInputBtn" type="button">清空输入框</button>
+      <div class="toolbar">
+        <button class="tool-btn" id="toggleMoreBtn">更多</button>
+        <button class="tool-btn" id="toggleLogBtn">显示最近21天</button>
+      </div>
+
+      <div class="more-panel" id="morePanel">
+        <div class="btn-grid">
+          <button class="tone-g record-btn" data-field="poopStart">
+            <span class="btn-title">开始拉了</span>
+            <span class="btn-time">未记录</span>
+            <span class="btn-hint">点一下自动记时间</span>
+          </button>
+          <button class="tone-h record-btn" data-field="poopEnd">
+            <span class="btn-title">拉了结束</span>
+            <span class="btn-time">未记录</span>
+            <span class="btn-hint">点一下自动记时间</span>
+          </button>
+          <button class="tone-i record-btn" data-field="crashed">
+            <span class="btn-title">崩了</span>
+            <span class="btn-time">未记录</span>
+            <span class="btn-hint">失眠那天点一次</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="note-wrap">
+        <div class="section-title">备注</div>
+        <div class="note-row">
+          <textarea id="noteInput" placeholder="例如：今天状态有点累，腿比较酸。再次保存会自动追加到后面。"></textarea>
+          <button class="tool-btn" id="saveNoteBtn">保存备注</button>
+        </div>
+        <div class="tip">备注会保存到今天，并显示在最近21天表格最后一列。备注可反复保存，新的内容会自动追加。</div>
+        <div class="today-note" id="todayNotePreview">今天备注：无数据</div>
+      </div>
+
+      <div class="toolbar-3">
+        <button class="tool-btn" id="exportBtn">导出备份</button>
+        <label class="tool-btn" style="display:flex;align-items:center;justify-content:center;">
+          导入备份
+          <input id="importInput" type="file" accept="application/json" style="display:none" />
+        </label>
+        <button class="tool-btn warn" id="clearBtn">清空全部数据</button>
+      </div>
+
+      <div class="tip">说明：表格里“健身前睡觉总时间”= 健身前睡了 到 健身前醒了；“拉了多久”= 开始拉了 到 拉了结束。若跨过零点，会自动按隔天计算。按了“崩了”的那一天会整行变红。</div>
+
+      <div class="log" id="logSection">
+        <div class="history-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>日期</th>
+                <th>健身前睡了</th>
+                <th>健身前醒了</th>
+                <th>健身前睡觉总时间</th>
+                <th>出门健身了</th>
+                <th>躺下了</th>
+                <th>入睡</th>
+                <th>二次入睡</th>
+                <th>开始拉了</th>
+                <th>拉了结束</th>
+                <th>拉了多久</th>
+                <th>崩了</th>
+                <th>备注</th>
+              </tr>
+            </thead>
+            <tbody id="historyBody"></tbody>
+          </table>
         </div>
       </div>
     </div>
-
-    <div class="card hidden" id="historyCard">
-      <div style="font-size:18px; font-weight:800;">最近21天</div>
-      <div class="history-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>日期</th>
-              <th>健身前睡了</th>
-              <th>健身前醒了</th>
-              <th>健身前睡觉总时间</th>
-              <th>出门健身了</th>
-              <th>躺下了</th>
-              <th>入睡</th>
-              <th>二次入睡</th>
-              <th>开始拉了</th>
-              <th>拉了结束</th>
-              <th>拉了多久</th>
-              <th>备注</th>
-            </tr>
-          </thead>
-          <tbody id="historyBody"></tbody>
-        </table>
-      </div>
-      <div class="foot">说明：同一天同一个记录按钮只能按一次。备注可以多次保存，后续内容会追加到当天备注后面。</div>
-    </div>
-
-    <div class="card">
-      <div style="font-size:18px; font-weight:800; margin-bottom:10px;">数据工具</div>
-      <div class="tools three">
-        <button class="small-btn" id="exportBtn" type="button">导出备份</button>
-        <button class="small-btn" id="importBtn" type="button">导入备份</button>
-        <button class="small-btn warn" id="clearBtn" type="button">清空全部数据</button>
-      </div>
-      <input id="importFile" type="file" accept="application/json" class="hidden" />
-    </div>
   </div>
 
+  <div class="toast" id="toast"></div>
+
   <script>
-    const STORAGE_KEY = 'daily_tracker_tokyo_v6';
+    const STORAGE_KEY = 'daily_tracker_jst_v4';
     const DAYS_TO_SHOW = 21;
-    const TOKYO_TZ = 'Asia/Tokyo';
-    const WEEKDAYS_JP = ['日', '月', '火', '水', '木', '金', '土'];
+    const WEEKDAYS = ['日', '月', '火', '水', '木', '金', '土'];
 
-    const MAIN_EVENTS = [
-      { key: 'preSleep', label: '健身前睡了', color: 'c1' },
-      { key: 'preWake', label: '健身前醒了', color: 'c2' },
-      { key: 'goGym', label: '出门健身了', color: 'c3' },
-      { key: 'lieDown', label: '躺下了', color: 'c4' },
-      { key: 'sleep', label: '入睡', color: 'c5' },
-      { key: 'secondSleep', label: '二次入睡', color: 'c6' }
-    ];
+    const FIELD_MAP = {
+      preGymSleep: { label: '健身前睡了' },
+      preGymWake: { label: '健身前醒了' },
+      gymOut: { label: '出门健身了' },
+      lieDown: { label: '躺下了' },
+      sleep: { label: '入睡' },
+      secondSleep: { label: '二次入睡' },
+      poopStart: { label: '开始拉了' },
+      poopEnd: { label: '拉了结束' },
+      crashed: { label: '崩了' }
+    };
 
-    const EXTRA_EVENTS = [
-      { key: 'poopStart', label: '开始拉了', color: 'c7' },
-      { key: 'poopEnd', label: '拉了结束', color: 'c8' }
-    ];
-
-    const ALL_EVENTS = [...MAIN_EVENTS, ...EXTRA_EVENTS];
-    const EVENT_LABELS = Object.fromEntries(ALL_EVENTS.map(item => [item.key, item.label]));
-
-    function makeButtonHtml(item) {
-      return `
-        <button type="button" class="${item.color}" data-event="${item.key}" id="btn-${item.key}">
-          <span class="btn-label">${item.label}</span>
-          <span class="btn-time"></span>
-        </button>
-      `;
-    }
-
-    document.getElementById('mainButtons').innerHTML = MAIN_EVENTS.map(makeButtonHtml).join('');
-    document.getElementById('extraButtons').innerHTML = EXTRA_EVENTS.map(makeButtonHtml).join('');
-
-    function getTokyoNowParts() {
-      const parts = new Intl.DateTimeFormat('en-CA', {
-        timeZone: TOKYO_TZ,
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit',
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: false
-      }).formatToParts(new Date());
-      const map = Object.fromEntries(parts.filter(p => p.type !== 'literal').map(p => [p.type, p.value]));
-      return {
-        year: Number(map.year),
-        month: Number(map.month),
-        day: Number(map.day),
-        hour: Number(map.hour),
-        minute: Number(map.minute),
-        dateKey: `${map.year}-${map.month}-${map.day}`.replace(/-(\d)(?=-|$)/g, '-0$1'),
-        timeText: `${map.hour}:${map.minute}`.replace(/\b(\d):/,'0$1:').replace(/:(\d)$/,':0$1')
-      };
-    }
-
-    function getCurrentDateKeyAndTime() {
-      const now = getTokyoNowParts();
-      return { dateKey: now.dateKey, timeText: now.timeText };
-    }
-
-    function parseDateKey(dateKey) {
-      const [y, m, d] = dateKey.split('-').map(Number);
-      return { y, m, d };
-    }
-
-    function formatDateLabel(dateKey) {
-      const { y, m, d } = parseDateKey(dateKey);
-      const day = new Date(Date.UTC(y, m - 1, d)).getUTCDay();
-      return `${m}/${d}（${WEEKDAYS_JP[day]}）`;
-    }
+    let toastTimer = null;
 
     function loadData() {
       try {
         const raw = localStorage.getItem(STORAGE_KEY);
-        return raw ? JSON.parse(raw) : {};
-      } catch {
+        const data = raw ? JSON.parse(raw) : {};
+        return data && typeof data === 'object' && !Array.isArray(data) ? data : {};
+      } catch (e) {
         return {};
       }
     }
@@ -408,113 +466,158 @@
       localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
     }
 
+    function nowPartsJST(date = new Date()) {
+      const formatter = new Intl.DateTimeFormat('ja-JP', {
+        timeZone: 'Asia/Tokyo',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false
+      });
+      const parts = Object.fromEntries(formatter.formatToParts(date).map(p => [p.type, p.value]));
+      return {
+        year: parts.year,
+        month: parts.month,
+        day: parts.day,
+        hour: parts.hour,
+        minute: parts.minute
+      };
+    }
+
+    function getCurrentTokyoInfo() {
+      const p = nowPartsJST();
+      return {
+        dateKey: `${p.year}-${p.month}-${p.day}`,
+        timeText: `${p.hour}:${p.minute}`
+      };
+    }
+
     function ensureDayRecord(data, dateKey) {
-      if (!data[dateKey]) {
+      if (!data[dateKey] || typeof data[dateKey] !== 'object') {
         data[dateKey] = {
-          preSleep: '',
-          preWake: '',
-          goGym: '',
+          preGymSleep: '',
+          preGymWake: '',
+          gymOut: '',
           lieDown: '',
           sleep: '',
           secondSleep: '',
           poopStart: '',
           poopEnd: '',
+          crashed: '',
           note: ''
         };
       }
-      return data[dateKey];
+      const day = data[dateKey];
+      if (typeof day.note !== 'string') day.note = '';
+      Object.keys(FIELD_MAP).forEach(key => {
+        if (typeof day[key] !== 'string') day[key] = '';
+      });
+      return day;
     }
 
-    function getRecentDateKeys(days) {
-      const { dateKey } = getCurrentDateKeyAndTime();
-      const { y, m, d } = parseDateKey(dateKey);
-      const base = new Date(Date.UTC(y, m - 1, d));
+    function pruneOldData(data) {
+      const keepKeys = new Set(getRecentDateKeys(DAYS_TO_SHOW));
+      Object.keys(data).forEach(key => {
+        if (!keepKeys.has(key)) delete data[key];
+      });
+    }
+
+    function getRecentDateKeys(days = 21) {
       const keys = [];
+      const base = nowPartsJST();
+      const utcBase = Date.UTC(Number(base.year), Number(base.month) - 1, Number(base.day), 0, 0, 0);
       for (let i = 0; i < days; i++) {
-        const dt = new Date(base);
-        dt.setUTCDate(base.getUTCDate() - i);
-        const yy = dt.getUTCFullYear();
-        const mm = String(dt.getUTCMonth() + 1).padStart(2, '0');
-        const dd = String(dt.getUTCDate()).padStart(2, '0');
-        keys.push(`${yy}-${mm}-${dd}`);
+        const d = new Date(utcBase - i * 24 * 60 * 60 * 1000);
+        const y = d.getUTCFullYear();
+        const m = String(d.getUTCMonth() + 1).padStart(2, '0');
+        const day = String(d.getUTCDate()).padStart(2, '0');
+        keys.push(`${y}-${m}-${day}`);
       }
       return keys;
     }
 
-    function pruneOldData(data) {
-      const keep = new Set(getRecentDateKeys(DAYS_TO_SHOW + 12));
-      for (const key of Object.keys(data)) {
-        if (!keep.has(key)) delete data[key];
-      }
+    function formatDateLabel(dateKey) {
+      const [y, m, d] = dateKey.split('-').map(Number);
+      const utcMs = Date.UTC(y, m - 1, d, 0, 0, 0);
+      const weekday = WEEKDAYS[new Date(utcMs).getUTCDay()];
+      return `${m}/${d}（${weekday}）`;
     }
 
-    function valueOrNone(v) {
-      return v || '无数据';
-    }
-
-    function parseTimeToMinutes(text) {
-      if (!text || !/^\d{2}:\d{2}$/.test(text)) return null;
-      const [h, m] = text.split(':').map(Number);
+    function parseTime(str) {
+      if (!str || typeof str !== 'string' || !str.includes(':')) return null;
+      const [h, m] = str.split(':').map(Number);
+      if (Number.isNaN(h) || Number.isNaN(m)) return null;
       return h * 60 + m;
     }
 
-    function formatDuration(start, end) {
-      const s = parseTimeToMinutes(start);
-      const e = parseTimeToMinutes(end);
-      if (s == null || e == null) return '无数据';
-      let diff = e - s;
+    function calculateDuration(startTime, endTime) {
+      const start = parseTime(startTime);
+      const end = parseTime(endTime);
+      if (start == null || end == null) return '无数据';
+      let diff = end - start;
       if (diff < 0) diff += 24 * 60;
       const h = Math.floor(diff / 60);
       const m = diff % 60;
       return `${h}小时${m}分`;
     }
 
-    function setStatus(text, type = 'ok') {
-      const el = document.getElementById('status');
+    function valueOrNone(value) {
+      return value && String(value).trim() ? String(value).trim() : '无数据';
+    }
+
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    function showToast(text) {
+      const el = document.getElementById('toast');
       el.textContent = text;
-      el.className = `status ${type === 'warn' ? 'warn-text' : 'ok'}`;
-      clearTimeout(setStatus._timer);
-      setStatus._timer = setTimeout(() => {
-        el.textContent = '';
-        el.className = 'status';
-      }, 2200);
+      el.classList.add('show');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => el.classList.remove('show'), 1800);
     }
 
-    function refreshButtonState(button, timeText, disabled) {
-      button.querySelector('.btn-time').textContent = timeText || '';
-      button.disabled = disabled;
-    }
-
-    function renderButtons() {
-      const { dateKey } = getCurrentDateKeyAndTime();
+    function updateButtonStates() {
+      const { dateKey } = getCurrentTokyoInfo();
       const data = loadData();
       const day = ensureDayRecord(data, dateKey);
-      for (const item of ALL_EVENTS) {
-        const btn = document.getElementById(`btn-${item.key}`);
-        const value = day[item.key] || '';
-        refreshButtonState(btn, value, Boolean(value));
-      }
+      saveData(data);
+
+      document.querySelectorAll('.record-btn').forEach(btn => {
+        const field = btn.dataset.field;
+        const value = day[field] || '';
+        const timeEl = btn.querySelector('.btn-time');
+        if (field === 'crashed') {
+          timeEl.textContent = value ? `已记录 ${value}` : '未记录';
+        } else {
+          timeEl.textContent = value || '未记录';
+        }
+        btn.disabled = Boolean(value);
+      });
     }
 
-    function renderToday() {
-      const { dateKey } = getCurrentDateKeyAndTime();
+    function renderTodayInfo() {
+      const { dateKey } = getCurrentTokyoInfo();
       const data = loadData();
       const day = ensureDayRecord(data, dateKey);
-      document.getElementById('todayLabel').textContent = `今天：${formatDateLabel(dateKey)}`;
-      document.getElementById('todaySummary').innerHTML = [
-        `健身前睡了：<b>${valueOrNone(day.preSleep)}</b>`,
-        `健身前醒了：<b>${valueOrNone(day.preWake)}</b>`,
-        `健身前睡觉总时间：<b>${formatDuration(day.preSleep, day.preWake)}</b>`,
-        `出门健身了：<b>${valueOrNone(day.goGym)}</b>`,
-        `躺下了：<b>${valueOrNone(day.lieDown)}</b>`,
-        `入睡：<b>${valueOrNone(day.sleep)}</b>`,
-        `二次入睡：<b>${valueOrNone(day.secondSleep)}</b>`,
-        `开始拉了：<b>${valueOrNone(day.poopStart)}</b>`,
-        `拉了结束：<b>${valueOrNone(day.poopEnd)}</b>`,
-        `拉了多久：<b>${formatDuration(day.poopStart, day.poopEnd)}</b>`
-      ].join('　｜　');
-      document.getElementById('todayNote').textContent = `今日备注：${day.note || '无数据'}`;
-      renderButtons();
+      saveData(data);
+
+      document.getElementById('todayInfo').textContent = `今天：${formatDateLabel(dateKey)}`;
+      document.getElementById('todayMiniSummary').textContent = [
+        `健身前睡了 ${valueOrNone(day.preGymSleep)}`,
+        `健身前醒了 ${valueOrNone(day.preGymWake)}`,
+        `出门健身了 ${valueOrNone(day.gymOut)}`,
+        `入睡 ${valueOrNone(day.sleep)}`,
+        `崩了 ${day.crashed ? '是' : '否'}`
+      ].join(' ｜ ');
+      document.getElementById('todayNotePreview').textContent = `今天备注：${valueOrNone(day.note)}`;
     }
 
     function renderHistory() {
@@ -522,89 +625,94 @@
       const data = loadData();
       const keys = getRecentDateKeys(DAYS_TO_SHOW);
       body.innerHTML = keys.map(dateKey => {
-        const day = data[dateKey] || {};
+        const day = ensureDayRecord(data, dateKey);
+        const crashed = Boolean(day.crashed);
         return `
-          <tr>
+          <tr class="${crashed ? 'crash-row' : ''}">
             <td>${formatDateLabel(dateKey)}</td>
-            <td>${valueOrNone(day.preSleep)}</td>
-            <td>${valueOrNone(day.preWake)}</td>
-            <td>${formatDuration(day.preSleep, day.preWake)}</td>
-            <td>${valueOrNone(day.goGym)}</td>
+            <td>${valueOrNone(day.preGymSleep)}</td>
+            <td>${valueOrNone(day.preGymWake)}</td>
+            <td>${calculateDuration(day.preGymSleep, day.preGymWake)}</td>
+            <td>${valueOrNone(day.gymOut)}</td>
             <td>${valueOrNone(day.lieDown)}</td>
             <td>${valueOrNone(day.sleep)}</td>
             <td>${valueOrNone(day.secondSleep)}</td>
             <td>${valueOrNone(day.poopStart)}</td>
             <td>${valueOrNone(day.poopEnd)}</td>
-            <td>${formatDuration(day.poopStart, day.poopEnd)}</td>
-            <td>${valueOrNone(day.note)}</td>
+            <td>${calculateDuration(day.poopStart, day.poopEnd)}</td>
+            <td>${crashed ? '<span class="tag-crash">崩了</span>' : '无数据'}</td>
+            <td>${escapeHtml(valueOrNone(day.note))}</td>
           </tr>
         `;
       }).join('');
+      saveData(data);
     }
 
-    function recordEvent(eventKey) {
+    function recordField(field) {
       const data = loadData();
-      const { dateKey, timeText } = getCurrentDateKeyAndTime();
+      const { dateKey, timeText } = getCurrentTokyoInfo();
       const day = ensureDayRecord(data, dateKey);
-      if (day[eventKey]) {
-        setStatus(`${EVENT_LABELS[eventKey]} 今天已经记录过了`, 'warn');
+
+      if (day[field]) {
+        showToast(`今天的“${FIELD_MAP[field].label}”已记录`);
+        updateButtonStates();
         return;
       }
-      day[eventKey] = timeText;
+
+      day[field] = timeText;
       pruneOldData(data);
       saveData(data);
-      renderToday();
+      updateButtonStates();
+      renderTodayInfo();
       renderHistory();
-      setStatus(`已记录：${EVENT_LABELS[eventKey]} ${timeText}`);
+      showToast(`已记录：${FIELD_MAP[field].label} ${timeText}`);
     }
 
     function saveNote() {
       const input = document.getElementById('noteInput');
       const text = input.value.trim();
       if (!text) {
-        setStatus('备注内容不能为空', 'warn');
+        showToast('请先输入备注');
         return;
       }
       const data = loadData();
-      const { dateKey } = getCurrentDateKeyAndTime();
+      const { dateKey } = getCurrentTokyoInfo();
       const day = ensureDayRecord(data, dateKey);
       day.note = day.note ? `${day.note} / ${text}` : text;
       pruneOldData(data);
       saveData(data);
       input.value = '';
-      renderToday();
+      renderTodayInfo();
       renderHistory();
-      setStatus('备注已追加保存');
-    }
-
-    function toggleHistory() {
-      const card = document.getElementById('historyCard');
-      const btn = document.getElementById('toggleViewBtn');
-      const show = card.classList.contains('hidden');
-      card.classList.toggle('hidden', !show);
-      btn.textContent = show ? '收起最近21天' : '显示最近21天';
-      if (show) renderHistory();
+      showToast('备注已追加保存');
     }
 
     function toggleMore() {
-      const box = document.getElementById('extraButtons');
+      const panel = document.getElementById('morePanel');
       const btn = document.getElementById('toggleMoreBtn');
-      const show = box.classList.contains('hidden');
-      box.classList.toggle('hidden', !show);
-      btn.textContent = show ? '收起更多' : '更多';
+      const open = panel.classList.toggle('open');
+      btn.textContent = open ? '收起更多' : '更多';
+    }
+
+    function toggleLog() {
+      const section = document.getElementById('logSection');
+      const btn = document.getElementById('toggleLogBtn');
+      const open = section.classList.toggle('open');
+      btn.textContent = open ? '收起最近21天' : '显示最近21天';
+      if (open) renderHistory();
     }
 
     function exportData() {
       const data = loadData();
       const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      const { dateKey } = getCurrentDateKeyAndTime();
-      a.href = url;
-      a.download = `daily-tracker-backup-${dateKey}.json`;
-      a.click();
+      const link = document.createElement('a');
+      const { dateKey } = getCurrentTokyoInfo();
+      link.href = url;
+      link.download = `daily-record-backup-${dateKey}.json`;
+      link.click();
       URL.revokeObjectURL(url);
-      setStatus('已导出备份');
+      showToast('已导出备份');
     }
 
     function importDataFromFile(file) {
@@ -613,13 +721,16 @@
       reader.onload = () => {
         try {
           const imported = JSON.parse(reader.result);
-          if (!imported || typeof imported !== 'object' || Array.isArray(imported)) throw new Error();
+          if (!imported || typeof imported !== 'object' || Array.isArray(imported)) throw new Error('bad');
+          Object.keys(imported).forEach(key => ensureDayRecord(imported, key));
+          pruneOldData(imported);
           saveData(imported);
-          renderToday();
+          updateButtonStates();
+          renderTodayInfo();
           renderHistory();
-          setStatus('已导入备份');
-        } catch {
-          setStatus('导入失败：文件格式不正确', 'warn');
+          showToast('已导入备份');
+        } catch (e) {
+          showToast('导入失败：文件格式不正确');
         }
       };
       reader.readAsText(file, 'utf-8');
@@ -628,28 +739,27 @@
     function clearAllData() {
       if (!confirm('确定要清空全部记录吗？这个操作不能撤销。')) return;
       localStorage.removeItem(STORAGE_KEY);
-      renderToday();
+      updateButtonStates();
+      renderTodayInfo();
       renderHistory();
-      document.getElementById('noteInput').value = '';
-      setStatus('已清空全部数据', 'warn');
+      showToast('已清空全部数据');
     }
 
-    document.querySelectorAll('button[data-event]').forEach(btn => {
-      btn.addEventListener('click', () => recordEvent(btn.dataset.event));
+    document.querySelectorAll('.record-btn').forEach(btn => {
+      btn.addEventListener('click', () => recordField(btn.dataset.field));
     });
-
-    document.getElementById('toggleViewBtn').addEventListener('click', toggleHistory);
     document.getElementById('toggleMoreBtn').addEventListener('click', toggleMore);
+    document.getElementById('toggleLogBtn').addEventListener('click', toggleLog);
     document.getElementById('saveNoteBtn').addEventListener('click', saveNote);
-    document.getElementById('clearNoteInputBtn').addEventListener('click', () => {
-      document.getElementById('noteInput').value = '';
-    });
     document.getElementById('exportBtn').addEventListener('click', exportData);
-    document.getElementById('importBtn').addEventListener('click', () => document.getElementById('importFile').click());
-    document.getElementById('importFile').addEventListener('change', (e) => importDataFromFile(e.target.files[0]));
     document.getElementById('clearBtn').addEventListener('click', clearAllData);
+    document.getElementById('importInput').addEventListener('change', (e) => {
+      importDataFromFile(e.target.files[0]);
+      e.target.value = '';
+    });
 
-    renderToday();
+    updateButtonStates();
+    renderTodayInfo();
     renderHistory();
   </script>
 </body>
